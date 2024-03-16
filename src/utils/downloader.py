@@ -47,7 +47,7 @@ class AsyncDownloader:
                 r_headers = head_response.headers
                 content_length = int(r_headers.get("Content-Length"), 0)
                 SyncLogger.info(
-                    f"Downloading {filename} | {round(content_length/1000000, 2)} MB in total"
+                    f"Downloading | {filename} | {round(content_length/1000000, 2)} MB"
                 )
 
         if r_headers.get("Accept-Ranges", "none") == "bytes":
@@ -58,7 +58,7 @@ class AsyncDownloader:
             )
             await self.__download_without_range(uri, file_path)
         SyncLogger.success(
-            f"Downloaded {filename} in {time.time() - start_time:.2f} s | {(content_length / 1000 / 1000) / (time.time() - start_time):.2f} MB/s"
+            f"Downloaded | {filename} | {(content_length / 1000 / 1000) / (time.time() - start_time):.2f} MB/s | {time.time() - start_time:.2f} s"
         )
         return file_path
 

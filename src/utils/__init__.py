@@ -1,4 +1,4 @@
-from .network import get_proxy, get_json, get_text  # noqa: F401
+from .network import get_proxy  # noqa: F401
 from .logger import SyncLogger, __version__  # noqa: F401
 from .downloader import Downloader  # noqa: F401
 from .settings import cfg, init_settings, read_settings  # noqa: F401
