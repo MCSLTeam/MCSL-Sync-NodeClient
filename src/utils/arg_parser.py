@@ -13,7 +13,7 @@ argument_parser.add_argument(
     "-u",
     "--update",
     help="Update core files",
-    action="store_true",
+    # action="store_true",
     default=False,
 )
 argument_parser.add_argument(
@@ -31,9 +31,27 @@ argument_parser.add_argument(
     default=False,
 )
 argument_parser.add_argument(
-    "-d",
-    "--download",
+    "-t",
+    "--test-url",
     help="Test Downloader",
-    # action="store_true",
+    default=False,
+)
+argument_parser.add_argument(
+    "-g",
+    "--global-upstream",
+    help="Set global upstream server",
+    default=False,
+)
+argument_parser.add_argument(
+    "-sg",
+    "--sync-database",
+    help="Fetch upstream database",
+    default=False,
+)
+argument_parser.add_argument(
+    "-c",
+    "--calculate",
+    help="Calculate space",
+    action="store_true",
     default=False,
 )

@@ -130,5 +130,13 @@ class AsyncDownloader:
                 # remove file
                 os.remove(part_file)
 
+async def show_content_length(uri: str):
+    async with aiohttp.ClientSession(
+        trust_env=not bool(isinstance(await get_proxy(), str)), headers=headers
+    ) as session:
+        async with session.head(uri, allow_redirects=True) as head_response:
+            assert head_response.ok
+            r_headers = head_response.headers
+            content_length = int(r_headers.get("Content-Length"), 0)
+            return round(content_length/1000000, 2)
 
-Downloader = AsyncDownloader(worker_num=4, output_path=".")

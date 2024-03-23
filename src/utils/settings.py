@@ -7,14 +7,14 @@ config_template = {
     "port": 4523,
     "ssl_cert_path": "",
     "ssl_key_path": "",
+    "global_upstream": "",
 }
 cfg = config_template.copy()  # type: dict
 makedirs("data", exist_ok=True)
 makedirs("logs", exist_ok=True)
 makedirs("files", exist_ok=True)
 makedirs("files/tmp", exist_ok=True)
-makedirs("data/production", exist_ok=True)
-makedirs("data/runtime", exist_ok=True)
+makedirs("data/upstream", exist_ok=True)
 
 
 def init_settings():
