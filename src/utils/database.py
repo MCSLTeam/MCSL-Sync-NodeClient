@@ -1,7 +1,7 @@
 import sqlite3
 from .logger import SyncLogger
 from asyncio import create_task
-from .downloader import show_content_length
+from .downloader import get_content_length
 available_downloads = [
     "Arclight",
     "Lightfall",
@@ -118,7 +118,7 @@ def update_database(
 
 
 
-async def calculate_single_core_file_size():
+async def get_core_url():
     aa = [
         create_task(get_non_empty_download_urls("upstream", core_type))
         for core_type in available_downloads
@@ -129,13 +129,14 @@ async def calculate_single_core_file_size():
     return aa  # type: list[str]
 
 async def get_total_space() -> int:
-    non_empty_urls = await calculate_single_core_file_size()
+    non_empty_urls = await get_core_url()
     total_length = 0
     for url in non_empty_urls:
         try:
-            length = await show_content_length(url)
+            length = await get_content_length(url)
             total_length += length
-            print(total_length, "MB")
+            total_length = round(total_length, 2)
+            print("[+]", length, "MB | Total:", total_length, "MB | URL:", url)
         except Exception as e:
             SyncLogger.error(f"Failed to get content length of {url} | {e}")
     return total_length
