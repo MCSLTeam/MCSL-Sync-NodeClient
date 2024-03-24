@@ -1,0 +1,39 @@
+name: Build Distribution
+
+on: workflow_dispatch
+
+permissions: write-all
+
+jobs:
+    build:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest]
+                python-version: [3.11]
+                architecture: [x64, x86, ARM64]
+
+        steps:
+        - uses: actions/checkout@v2
+
+        - name: Set up Python ${{ matrix.python-version }}
+          uses: actions/setup-python@v2
+          with:
+              python-version: ${{ matrix.python-version }}
+              architecture: ${{ matrix.architecture }}
+
+        - name: Install dependencies
+          run: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+              pip install nuitka
+
+        - name: Build with Nuitka
+          run: |
+            python -m nuitka --standalone --mingw64 --output-dir=build --lto=yes --product-version=0.1.0 --company-name=MCSLTeam --file-version=1.0.0 --file-description="MCSL-Sync-Nodeside" --copyright="Copyright MCSLTeam. All rights reserved." --include-package=src,sqlite3,aiohttp,orjson,pandas,lxml,uvicorn --assume-yes-for-download --follow-import-to=loguru,quart --main=MCSLSync.py --remove-output
+
+        - name: Upload artifact
+          uses: actions/upload-artifact@v2
+          with:
+            name: distribution
+            path: build/*/**/
