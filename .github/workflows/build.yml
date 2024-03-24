@@ -21,6 +21,9 @@ jobs:
           with:
               python-version: ${{ matrix.python-version }}
               architecture: ${{ matrix.architecture }}
+              cache: 'pip'
+              cache-dependency-path: |
+                requirement.txt
 
         - name: Install dependencies
           run: |
