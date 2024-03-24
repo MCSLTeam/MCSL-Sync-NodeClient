@@ -33,7 +33,7 @@ class AsyncDownloader:
             core_type + "-" + mc_version + "-" + core_version + ".jar"
         )
         file_path: pathlib.Path = pathlib.Path(
-            self.output_path, core_type, mc_version, filename
+            self.output_path, filename
         ).absolute()
         r_headers: Optional[CIMultiDictProxy] = None
         start_time = time.time()
