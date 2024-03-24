@@ -1,6 +1,4 @@
-from aiohttp import ClientSession
-from .logger import __version__
-from .logger import SyncLogger
+from .logger import __version__, SyncLogger
 
 
 @SyncLogger.catch
