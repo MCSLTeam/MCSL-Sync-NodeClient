@@ -1,8 +1,7 @@
-from src.utils import init_settings, argument_parser
+from src.utils import init_settings, argument_parser, FileSync
 from src import __version__
 from src.api import start_production_server
 import sys
-from src.utils.downloader import AsyncDownloader
 
 
 if __name__ == "__main__":
@@ -19,7 +18,8 @@ if __name__ == "__main__":
     if args.test_url:
         pass
     if args.update:
-        print(type(args), type(args.update))
+        from asyncio import run
+        run(FileSync().load_self())
     if args.calculate:
         from src.utils.database import get_total_space
         from asyncio import run
