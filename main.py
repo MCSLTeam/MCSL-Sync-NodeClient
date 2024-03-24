@@ -19,7 +19,7 @@ if __name__ == "__main__":
         pass
     if args.update:
         from asyncio import run
-        run(FileSync().load_self())
+        run(FileSync(upd=args.update).load_self())
     if args.calculate:
         from src.utils.database import get_total_space
         from asyncio import run
