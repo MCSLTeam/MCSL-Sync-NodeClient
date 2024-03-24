@@ -15,6 +15,7 @@ class AsyncDownloader:
         self.worker_num = worker_num
         self.output_path = output_path
 
+    @SyncLogger.catch
     async def download(
         self,
         uri: str,
@@ -43,6 +44,14 @@ class AsyncDownloader:
             trust_env=not bool(isinstance(await get_proxy(), str)), headers=headers
         ) as session:
             async with session.head(uri, allow_redirects=True) as head_response:
+                if head_response.status in [302, 307]:
+                    redirect_uri = head_response.headers.get("Location")
+                    return await self.download(
+                        uri=redirect_uri,
+                        core_type=core_type,
+                        mc_version=mc_version,
+                        core_version=core_version,
+                    )
                 assert head_response.ok
                 r_headers = head_response.headers
                 content_length = int(r_headers.get("Content-Length"), 0)
