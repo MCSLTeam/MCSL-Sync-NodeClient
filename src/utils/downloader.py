@@ -30,7 +30,7 @@ class AsyncDownloader:
         """
         content_length: int = 0
         filename = (
-            core_type + "-" + mc_version + "-" + core_version + "." + uri.split(".")[-1]
+            core_type + "-" + mc_version + "-" + core_version + ".jar"
         )
         file_path: pathlib.Path = pathlib.Path(
             self.output_path, core_type, mc_version, filename
