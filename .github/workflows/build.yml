@@ -14,10 +14,10 @@ jobs:
                 architecture: [x64, x86, ARM64]
 
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v4
 
         - name: Set up Python ${{ matrix.python-version }}
-          uses: actions/setup-python@v2
+          uses: actions/setup-python@v5
           with:
               python-version: ${{ matrix.python-version }}
               architecture: ${{ matrix.architecture }}
@@ -33,7 +33,7 @@ jobs:
             python -m nuitka --standalone --mingw64 --output-dir=build --lto=yes --product-version=0.1.0 --company-name=MCSLTeam --file-version=1.0.0 --file-description="MCSL-Sync-Nodeside" --copyright="Copyright MCSLTeam. All rights reserved." --include-package=src,sqlite3,aiohttp,orjson,pandas,lxml,uvicorn --assume-yes-for-download --follow-import-to=loguru,quart --main=MCSLSync.py --remove-output
 
         - name: Upload artifact
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v4.3.1
           with:
             name: distribution
             path: build/*/**/
