@@ -33,3 +33,10 @@ def read_settings():
     global cfg
     with open(file="data/settings.json", mode="r", encoding="utf-8") as f:
         cfg = loads(f.read())
+
+def set_upstream(url: str):
+    with open(file="data/settings.json", mode="r", encoding="utf-8") as f:
+        cfg = loads(f.read())
+    cfg["global_upstream"] = url
+    with open(file="data/settings.json", mode="w", encoding="utf-8") as f:
+        f.write(dumps(cfg, option=OPT_INDENT_2))
