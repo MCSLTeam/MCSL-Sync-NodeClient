@@ -3,6 +3,8 @@ build/
 downloads/
 .env
 .venv/
+.py311_venv/
+.py312_venv/
 files/
 venv/
 .idea/

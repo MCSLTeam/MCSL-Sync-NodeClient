@@ -33,7 +33,7 @@ jobs:
 
         - name: Build with Nuitka
           run: |
-            python -m nuitka --standalone --disable-ccache --clang --msvc=latest --output-dir=build --lto=yes --product-version=0.1.0 --company-name=MCSLTeam --file-version=1.0.0 --file-description="MCSL-Sync-Nodeside" --copyright="Copyright MCSLTeam. All rights reserved." --include-package=src,sqlite3,aiohttp,orjson,pandas,lxml,uvicorn --assume-yes-for-download --follow-import-to=loguru,quart --main=MCSLSync.py --remove-output
+            python -m nuitka --standalone --disable-ccache --clang --msvc=latest --output-dir=build --lto=yes --product-version=0.1.0 --company-name=MCSLTeam --file-version=1.0.0 --file-description="MCSL-Sync-Nodeside" --copyright="Copyright MCSLTeam. All rights reserved." --include-package=src,sqlite3,aiohttp,orjson,pandas,lxml,uvicorn --assume-yes-for-download --follow-import-to=loguru,quart --main=main.py --remove-output
 
         - name: Upload artifact
           uses: actions/upload-artifact@v4.3.1

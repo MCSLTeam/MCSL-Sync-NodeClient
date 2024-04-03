@@ -1,7 +1,7 @@
-from quart import Quart, request
+from quart import Quart, request, send_file
 from werkzeug.exceptions import HTTPException
 from ..utils import __version__, cfg
-
+import aiofiles.os
 import uvicorn
 from .model import gen_response
 
@@ -51,7 +51,7 @@ async def base_dir():
     """
     return await gen_response(
         status_code=200,
-        msg=f"MCSL-Sync v{__version__} on Quart!",
+        msg=f"MCSL-Sync-Nodeside v{__version__} on Quart!",
     )
 
 
@@ -60,7 +60,7 @@ async def base_dir():
 async def get_app_info():
     return await gen_response(
         data={
-            "name": "MCSL-Sync",
+            "name": "MCSL-Sync-Nodeside",
             "author": "MCSLTeam",
             "version": f"v{__version__}",
             "config": cfg,
@@ -88,12 +88,9 @@ async def get_core(core_type: str = ""):
 async def get_mc_versions(core_type: str = ""):
     from ..utils import get_mc_versions, available_downloads
 
-    is_runtime = request.args.get("runtime", True)
-    database_type = "runtime" if is_runtime else "production"
-
     database_data = (
         await get_mc_versions(
-            database_type=database_type,
+            database_type="upstream",
             core_type=core_type,
         )
         if core_type in available_downloads
@@ -101,7 +98,7 @@ async def get_mc_versions(core_type: str = ""):
     )
 
     resp = await gen_response(
-        data={"type": database_type, "versions": database_data}
+        data={"type": "upstream", "versions": database_data}
         if core_type in available_downloads
         else None,
         status_code=200 if core_type in available_downloads else 404,
@@ -111,7 +108,7 @@ async def get_mc_versions(core_type: str = ""):
             else "Error: No data were found."
         ),
     )
-    del get_mc_versions, is_runtime, database_type, database_data
+    del get_mc_versions, database_data
     return resp
 
 
@@ -120,11 +117,9 @@ async def get_mc_versions(core_type: str = ""):
 async def get_core_versions(core_type: str = "", mc_version: str = ""):
     from ..utils import get_mc_versions, get_core_versions, available_downloads
 
-    is_runtime = request.args.get("runtime", True)
-    database_type = "runtime" if is_runtime else "production"
     versions_list = (
         await get_mc_versions(
-            database_type=database_type,
+            database_type="upstream",
             core_type=core_type,
         )
         if core_type in available_downloads
@@ -132,7 +127,7 @@ async def get_core_versions(core_type: str = "", mc_version: str = ""):
     )
     database_data = (
         await get_core_versions(
-            database_type=database_type,
+            database_type="upstream",
             core_type=core_type,
             mc_version=mc_version,
         )
@@ -140,7 +135,7 @@ async def get_core_versions(core_type: str = "", mc_version: str = ""):
         else []
     )
     resp = await gen_response(
-        data={"type": database_type, "builds": database_data}
+        data={"type": "upstream", "builds": database_data}
         if mc_version in versions_list
         else None,
         status_code=200 if mc_version in versions_list else 404,
@@ -149,8 +144,6 @@ async def get_core_versions(core_type: str = "", mc_version: str = ""):
     del (
         get_core_versions,
         get_mc_versions,
-        is_runtime,
-        database_type,
         database_data,
         versions_list,
     )
@@ -169,11 +162,9 @@ async def get_specified_core(
         get_specified_core_data,
     )
 
-    is_runtime = request.args.get("runtime", True)
-    database_type = "runtime" if is_runtime else "production"
     mc_versions_list = (
         await get_mc_versions(
-            database_type=database_type,
+            database_type="upstream",
             core_type=core_type,
         )
         if core_type in available_downloads
@@ -181,7 +172,7 @@ async def get_specified_core(
     )
     core_versions_list = (
         await get_core_versions(
-            database_type=database_type,
+            database_type="upstream",
             core_type=core_type,
             mc_version=mc_version,
         )
@@ -190,7 +181,7 @@ async def get_specified_core(
     )
     database_data = (
         await get_specified_core_data(
-            database_type=database_type,
+            database_type="upstream",
             core_type=core_type,
             mc_version=mc_version,
             core_version=core_version,
@@ -199,7 +190,7 @@ async def get_specified_core(
         else {}
     )
     resp = await gen_response(
-        data={"type": database_type, "build": database_data}
+        data={"type": "upstream", "build": database_data}
         if core_version in core_versions_list
         else None,
         status_code=200 if core_version in core_versions_list else 404,
@@ -212,9 +203,26 @@ async def get_specified_core(
     del (
         get_core_versions,
         get_mc_versions,
-        is_runtime,
-        database_type,
         database_data,
         mc_versions_list,
     )
+    return resp
+
+
+@sync_api.route("/core/<core_type>/<mc_version>/<core_version>/download")
+@sync_api.route("/core/<core_type>/<mc_version>/<core_version>/download/")
+async def get_file(core_type: str = "", mc_version: str = "", core_version: str = ""):
+    if await aiofiles.os.path.exists(
+        f"files/{core_type}/{mc_version}/{core_type}-{mc_version}-{core_version}.jar"
+    ):
+        resp = await send_file(
+            filename_or_io=f"files/{core_type}/{mc_version}/{core_type}-{mc_version}-{core_version}.jar",
+            attachment_filename=f"{core_type}-{mc_version}-{core_version}.jar",
+            as_attachment=True,
+        )
+    else:
+        resp = await gen_response(
+            status_code=404,
+            msg="Error: File not found.",
+        )
     return resp
