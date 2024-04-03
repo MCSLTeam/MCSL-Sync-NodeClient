@@ -5,6 +5,8 @@ import sys
 
 
 if __name__ == "__main__":
+    from src.utils import read_settings
+    read_settings()
     args = argument_parser.parse_args()
     if not any(value for _, value in args.__dict__.items()):
         argument_parser.error("No argument was specified.")
@@ -24,4 +26,7 @@ if __name__ == "__main__":
         from src.utils.database import get_total_space
         from asyncio import run
         print(run(get_total_space()))
+    if args.global_upstream:
+        from src.utils import set_upstream
+        set_upstream(args.global_upstream)
     sys.exit(0)
