@@ -9,7 +9,6 @@ config_template = {
     "ssl_key_path": "",
     "global_upstream": "",
 }
-cfg = config_template.copy()  # type: dict
 makedirs("data", exist_ok=True)
 makedirs("logs", exist_ok=True)
 makedirs("files", exist_ok=True)
@@ -17,7 +16,7 @@ makedirs("files/tmp", exist_ok=True)
 makedirs("data/upstream", exist_ok=True)
 
 
-def init_settings():
+def init_settings() -> None:
     SyncLogger.info("Initialize Settings...")
     if not osp.exists("data/settings.json"):
         with open(
@@ -29,14 +28,18 @@ def init_settings():
         pass
 
 
-def read_settings():
-    global cfg
+def read_settings() -> dict:
     with open(file="data/settings.json", mode="r", encoding="utf-8") as f:
         cfg = loads(f.read())
+    return cfg
 
-def set_upstream(url: str):
+
+def set_upstream(url: str) -> None:
     with open(file="data/settings.json", mode="r", encoding="utf-8") as f:
         cfg = loads(f.read())
     cfg["global_upstream"] = url
     with open(file="data/settings.json", mode="w", encoding="utf-8") as f:
         f.write(dumps(cfg, option=OPT_INDENT_2))
+
+
+cfg = read_settings()  # type: dict
