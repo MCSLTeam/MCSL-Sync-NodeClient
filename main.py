@@ -22,10 +22,10 @@ if __name__ == "__main__":
     if args.update:
         from asyncio import run
         run(FileSync(upd=args.update).load_self())
-    if args.calculate:
-        from src.utils.database import get_total_space
+    if args.sync_database:
+        from src.utils import sync_database
         from asyncio import run
-        print(run(get_total_space()))
+        run(sync_database())
     if args.global_upstream:
         from src.utils import set_upstream
         set_upstream(args.global_upstream)

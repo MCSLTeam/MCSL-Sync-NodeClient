@@ -45,13 +45,7 @@ argument_parser.add_argument(
 argument_parser.add_argument(
     "-sg",
     "--sync-database",
-    help="Fetch upstream database",
-    default=False,
-)
-argument_parser.add_argument(
-    "-c",
-    "--calculate",
-    help="Calculate space",
+    help="Sync database",
     action="store_true",
     default=False,
 )
