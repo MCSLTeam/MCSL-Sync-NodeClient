@@ -29,7 +29,7 @@ makedirs("data/upstream", exist_ok=True)
 
 
 def init_settings():
-    SyncLogger.info("Initialize Settings...")
+    SyncLogger.info("Initializing Settings...")
     if not osp.exists("data/settings.json"):
         with open(
             file="data/settings.json",

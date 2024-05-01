@@ -58,12 +58,13 @@ async def base_dir():
 @sync_api.route("/public/statistics")
 @sync_api.route("/public/statistics/")
 async def get_app_info():
+    (no_secret_cfg := cfg.copy()).pop("secret_key")
     return await gen_response(
         data={
             "name": "MCSL-Sync-Nodeside",
             "author": "MCSLTeam",
             "version": f"v{__version__}",
-            "config": cfg,
+            "config": no_secret_cfg,
         },
         status_code=200,
         msg="Success!",
