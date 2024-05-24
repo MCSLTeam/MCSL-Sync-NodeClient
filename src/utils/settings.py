@@ -1,9 +1,10 @@
-from orjson import loads, dumps, OPT_INDENT_2
+from hashlib import md5
 from os import path as osp, makedirs, name as osname, getenv, getlogin
 from platform import processor, system as sysType
-from hashlib import md5
-from .logger import SyncLogger
 
+from orjson import loads, dumps, OPT_INDENT_2
+
+from .logger import SyncLogger
 
 config_template = {
     "url": "0.0.0.0",
@@ -15,7 +16,7 @@ config_template = {
         [
             md5(
                 f"{getlogin() if osname == 'nt' else getenv('USER')}{processor()}{sysType()}".encode()
-            ).hexdigest()[i : i + 4]
+            ).hexdigest()[i: i + 4]
             for i in range(0, 24, 1)
         ]
     ),
@@ -32,8 +33,8 @@ def init_settings():
     SyncLogger.info("Initializing Settings...")
     if not osp.exists("data/settings.json"):
         with open(
-            file="data/settings.json",
-            mode="wb+",
+                file="data/settings.json",
+                mode="wb+",
         ) as newConfig:
             newConfig.write(dumps(config_template, option=OPT_INDENT_2))
     else:
@@ -42,8 +43,12 @@ def init_settings():
 
 def read_settings():
     global cfg
-    with open(file="data/settings.json", mode="r", encoding="utf-8") as f:
-        cfg = loads(f.read())
+    try:
+        with open(file="data/settings.json", mode="r", encoding="utf-8") as f:
+            cfg = loads(f.read())
+    except FileNotFoundError:
+        init_settings()
+        read_settings()
 
 def set_upstream(url: str) -> None:
     with open(file="data/settings.json", mode="r", encoding="utf-8") as f:
