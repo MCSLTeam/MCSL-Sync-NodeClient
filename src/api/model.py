@@ -23,6 +23,5 @@ async def gen_response(
         ),
         status_code,
     )
-    response = route_cors(response, allow_origin="*")  # 允许所有源
     response.mimetype = "application/json"
     return response
