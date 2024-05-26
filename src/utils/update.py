@@ -30,14 +30,8 @@ class FileSync:
         self.download_tasks: list = []
 
     async def load_self(self):
-        tasks = [
-            create_task(self.load_single_core(core_type=core))
-            for core in self.update_core_list
-        ]
-        for task in tasks:
-            await task
-        for task in self.download_tasks:
-            await task
+        for core in self.update_core_list:
+            await self.load_single_core(core_type=core)
 
     async def load_single_core(self, core_type: str):
         mc_versions_list = await get_mc_versions(
