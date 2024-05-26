@@ -36,8 +36,6 @@ class AsyncDownloader:
         ).absolute()
         r_headers: Optional[CIMultiDictProxy] = None
         start_time = time.time()
-        os.makedirs(f"files/{core_type}", exist_ok=True)
-        os.makedirs(f"files/{core_type}/{mc_version}", exist_ok=True)
 
         async with aiohttp.ClientSession(
             trust_env=not bool(isinstance(await get_proxy(), str)), headers=headers

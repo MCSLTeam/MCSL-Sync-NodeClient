@@ -7,7 +7,7 @@ from .database import (
 from .downloader import AsyncDownloader
 from .settings import cfg
 from asyncio import create_task
-
+import os
 
 async def sync_database():
     from aiohttp import ClientSession
@@ -27,7 +27,6 @@ async def sync_database():
 class FileSync:
     def __init__(self, upd: list | str = "all"):
         self.update_core_list = available_downloads if upd == "all" else upd.split(",")
-        self.download_tasks: list = []
 
     async def load_self(self):
         for core in self.update_core_list:
@@ -37,6 +36,7 @@ class FileSync:
         mc_versions_list = await get_mc_versions(
             database_type="upstream", core_type=core_type
         )
+        os.makedirs(f"files/{core_type}", exist_ok=True)
         tasks = [
             create_task(
                 self.load_single_version(core_type=core_type, mc_version=mc_version)
@@ -50,6 +50,7 @@ class FileSync:
         core_versions_list = await get_core_versions(
             database_type="upstream", core_type=core_type, mc_version=mc_version
         )
+        os.makedirs(f"files/{core_type}/{mc_version}", exist_ok=True)
         tasks = [
             create_task(
                 self.load_single_build(
@@ -72,13 +73,9 @@ class FileSync:
             mc_version=mc_version,
             core_version=core_version,
         )
-        self.download_tasks.append(
-            create_task(
-                AsyncDownloader(worker_num=8).download(
-                    uri=core_data["download_url"],
-                    core_type=core_data["core_type"],
-                    mc_version=core_data["mc_version"],
-                    core_version=core_data["core_version"],
-                )
-            )
+        await AsyncDownloader(worker_num=8).download(
+            uri=core_data["download_url"],
+            core_type=core_data["core_type"],
+            mc_version=core_data["mc_version"],
+            core_version=core_data["core_version"],
         )
