@@ -1,10 +1,8 @@
 from quart import Quart, make_response
-from quart_cors import cors, route_cors
 from typing import Union
 from orjson import dumps
 
 app = Quart(__name__)
-app = cors(app, allow_origin="*")  # 允许所有源
 
 
 async def gen_response(
