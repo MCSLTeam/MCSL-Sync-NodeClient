@@ -37,14 +37,8 @@ class FileSync:
             database_type="upstream", core_type=core_type
         )
         os.makedirs(f"files/{core_type}", exist_ok=True)
-        tasks = [
-            create_task(
-                self.load_single_version(core_type=core_type, mc_version=mc_version)
-            )
-            for mc_version in mc_versions_list
-        ]
-        for task in tasks:
-            await task
+        for mc_version in mc_versions_list:
+            await self.load_single_version(core_type=core_type, mc_version=mc_version)
 
     async def load_single_version(self, core_type: str, mc_version: str):
         core_versions_list = await get_core_versions(
@@ -73,7 +67,7 @@ class FileSync:
             mc_version=mc_version,
             core_version=core_version,
         )
-        await AsyncDownloader(worker_num=8).download(
+        await AsyncDownloader(worker_num=4).download(
             uri=core_data["download_url"],
             core_type=core_data["core_type"],
             mc_version=core_data["mc_version"],
