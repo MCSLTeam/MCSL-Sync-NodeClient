@@ -80,12 +80,16 @@ class FileSync:
         )
 
         async def download():
-            await AsyncDownloader(worker_num=4).download(
-                uri=core_data["download_url"],
-                core_type=core_data["core_type"],
-                mc_version=core_data["mc_version"],
-                core_version=core_data["core_version"],
-            )
-            self.threadCount -= 1
+            try:
+                await AsyncDownloader(worker_num=4).download(
+                    uri=core_data["download_url"],
+                    core_type=core_data["core_type"],
+                    mc_version=core_data["mc_version"],
+                    core_version=core_data["core_version"],
+                )
+            except AssertionError:
+                pass
+            finally:
+                self.threadCount -= 1
 
         run(download())

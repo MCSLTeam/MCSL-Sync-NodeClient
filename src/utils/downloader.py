@@ -4,10 +4,12 @@ import pathlib
 import time
 from asyncio import Task
 from typing import Optional
-from .logger import SyncLogger
-from .network import get_proxy, headers
+
 import aiohttp
 from multidict import CIMultiDictProxy
+
+from .logger import SyncLogger
+from .network import get_proxy, headers
 
 
 class AsyncDownloader:
@@ -16,11 +18,12 @@ class AsyncDownloader:
         self.output_path = output_path
 
     async def download(
-        self,
-        uri: str,
-        core_type: str = "",
-        mc_version: str = "",
-        core_version: str = "",
+            self,
+            uri: str,
+            core_type: str = "",
+            mc_version: str = "",
+            core_version: str = "",
+            retries: int = 3,
     ) -> pathlib.Path:
         """
         :param uri: 下载地址
@@ -29,7 +32,7 @@ class AsyncDownloader:
         """
         content_length: int = 0
         filename = (
-            core_type + "-" + mc_version + "-" + core_version + "." + uri.split(".")[-1]
+                core_type + "-" + mc_version + "-" + core_version + "." + uri.split(".")[-1]
         )
         file_path: pathlib.Path = pathlib.Path(
             self.output_path, core_type, mc_version, filename
@@ -38,14 +41,23 @@ class AsyncDownloader:
         start_time = time.time()
 
         async with aiohttp.ClientSession(
-            trust_env=not bool(isinstance(await get_proxy(), str)), headers=headers
+                trust_env=not bool(isinstance(await get_proxy(), str)), headers=headers
         ) as session:
             async with session.head(uri, allow_redirects=True) as head_response:
-                assert head_response.ok
+                try:
+                    assert head_response.ok
+                except AssertionError as err:
+                    retries -= 1
+                    if retries > 0:
+                        SyncLogger.warning(f"从{uri}下载文件{filename}失败！正在重试！剩余重试次数：{retries}")
+                        await self.download(uri, core_type, mc_version, core_version, retries)
+                    else:
+                        SyncLogger.error(f"从{uri}下载文件{filename}失败！")
+                        raise err
                 r_headers = head_response.headers
                 content_length = int(r_headers.get("Content-Length"), 0)
                 SyncLogger.info(
-                    f"Downloading | {filename} | {round(content_length/1000000, 2)} MB"
+                    f"Downloading | {filename} | {round(content_length / 1000000, 2)} MB"
                 )
 
         if r_headers.get("Accept-Ranges", "none") == "bytes":
@@ -61,7 +73,7 @@ class AsyncDownloader:
         return file_path
 
     async def __download_with_range(
-        self, uri: str, file_path: pathlib.Path, content_length: int
+            self, uri: str, file_path: pathlib.Path, content_length: int
     ):
         partial_length = content_length // self.worker_num + 1
         task_list = []
@@ -74,10 +86,10 @@ class AsyncDownloader:
         self.__gather_part_files(file_path)
 
     async def __download_without_range(
-        self, uri: str, file_path: pathlib.Path, chunk_size: int = 4096
+            self, uri: str, file_path: pathlib.Path, chunk_size: int = 4096
     ):
         async with aiohttp.ClientSession(
-            trust_env=not bool(isinstance(await get_proxy(), str)), headers=headers
+                trust_env=not bool(isinstance(await get_proxy(), str)), headers=headers
         ) as session:
             async with session.get(uri) as response:
                 with open(file_path, "wb") as f:
@@ -88,22 +100,22 @@ class AsyncDownloader:
                         f.write(chunk)
 
     def __download_task(
-        self,
-        uri: str,
-        serial: int,
-        file_path: pathlib.Path,
-        begin: int,
-        end: int,
-        chunk_size: int = 4096,
+            self,
+            uri: str,
+            serial: int,
+            file_path: pathlib.Path,
+            begin: int,
+            end: int,
+            chunk_size: int = 4096,
     ) -> Task:
         partial_filename = f"{self.output_path}/tmp/{file_path.stem}.part{serial}"
 
         async def download():
             async with aiohttp.ClientSession(
-                trust_env=not bool(isinstance(await get_proxy(), str)), headers=headers
+                    trust_env=not bool(isinstance(await get_proxy(), str)), headers=headers
             ) as session:
                 async with session.get(
-                    uri, headers={"Range": f"bytes={begin}-{end}"}
+                        uri, headers={"Range": f"bytes={begin}-{end}"}
                 ) as response:
                     with open(partial_filename, "wb") as f:
                         while True:
@@ -127,4 +139,3 @@ class AsyncDownloader:
                     f.write(part.read())
                 # remove file
                 os.remove(part_file)
-
