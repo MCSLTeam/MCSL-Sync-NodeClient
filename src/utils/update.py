@@ -1,3 +1,7 @@
+import os
+from asyncio import create_task
+from time import sleep
+
 from .database import (
     available_downloads,
     get_mc_versions,
@@ -6,8 +10,7 @@ from .database import (
 )
 from .downloader import AsyncDownloader
 from .settings import cfg
-from asyncio import create_task
-import os
+
 
 async def sync_database():
     from aiohttp import ClientSession
@@ -45,21 +48,22 @@ class FileSync:
             database_type="upstream", core_type=core_type, mc_version=mc_version
         )
         os.makedirs(f"files/{core_type}/{mc_version}", exist_ok=True)
-        tasks = [
-            create_task(
+        tasks = []
+        for core_version in core_versions_list:
+            while len(tasks) >= cfg.get("max_tasks"):
+                sleep(0.5)
+            tasks.append(create_task(
                 self.load_single_build(
                     core_type=core_type,
                     mc_version=mc_version,
                     core_version=core_version,
                 )
-            )
-            for core_version in core_versions_list
-        ]
+            ))
         for task in tasks:
             await task
 
     async def load_single_build(
-        self, core_type: str, mc_version: str, core_version: str
+            self, core_type: str, mc_version: str, core_version: str
     ):
         core_data = await get_specified_core_data(
             database_type="upstream",

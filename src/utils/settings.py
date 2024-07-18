@@ -8,9 +8,10 @@ from .logger import SyncLogger
 
 config_template = {
     "url": "0.0.0.0",
-    "port": 4523,
+    "port": 4524,
     "ssl_cert_path": "",
     "ssl_key_path": "",
+    "max_tasks": 32,
     "global_upstream": "",
     "secret_key": "".join(
         [
