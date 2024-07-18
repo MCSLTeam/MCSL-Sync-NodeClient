@@ -70,7 +70,5 @@ class FileSync:
                 )
             except AssertionError:
                 pass
-            finally:
-                self.threadCount -= 1
 
         run(download())
