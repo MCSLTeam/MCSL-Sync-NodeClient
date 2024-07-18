@@ -21,7 +21,7 @@ if __name__ == "__main__":
         pass
     if args.update:
         from asyncio import run
-        run(FileSync(upd=args.update).load_self())
+        FileSync(upd=args.update).load_self()
     if args.sync_database:
         from src.utils import sync_database
         from asyncio import run

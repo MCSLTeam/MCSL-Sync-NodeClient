@@ -11,7 +11,7 @@ config_template = {
     "port": 4524,
     "ssl_cert_path": "",
     "ssl_key_path": "",
-    "max_tasks": 32,
+    "max_threads": 32,
     "global_upstream": "",
     "secret_key": "".join(
         [

@@ -31,7 +31,7 @@ available_downloads = [
 
 
 
-async def get_mc_versions(database_type: str, core_type: str) -> list[str]:
+def get_mc_versions(database_type: str, core_type: str) -> list[str]:
     with sqlite3.connect(f"data/{database_type}/{core_type}.db") as core:
         cursor = core.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
@@ -39,7 +39,7 @@ async def get_mc_versions(database_type: str, core_type: str) -> list[str]:
         return version_list
 
 
-async def get_core_versions(database_type: str, core_type: str, mc_version: str) -> list[str]:
+def get_core_versions(database_type: str, core_type: str, mc_version: str) -> list[str]:
     with sqlite3.connect(f"data/{database_type}/{core_type}.db") as core:
         cursor = core.cursor()
         cursor.execute(f"SELECT core_version FROM '{mc_version}' ORDER BY core_version")
@@ -47,7 +47,7 @@ async def get_core_versions(database_type: str, core_type: str, mc_version: str)
         return version_list
 
 
-async def get_specified_core_data(
+def get_specified_core_data(
     database_type: str, core_type: str, mc_version: str, core_version: str
 ) -> dict[str, str]:
     with sqlite3.connect(f"data/{database_type}/{core_type}.db") as core:
