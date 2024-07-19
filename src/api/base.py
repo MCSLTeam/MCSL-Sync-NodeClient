@@ -95,7 +95,7 @@ async def get_mc_versions(core_type: str = ""):
     from ..utils import get_mc_versions, available_downloads
 
     database_data = (
-        await get_mc_versions(
+        get_mc_versions(
             database_type="upstream",
             core_type=core_type,
         )
@@ -124,7 +124,7 @@ async def get_core_versions(core_type: str = "", mc_version: str = ""):
     from ..utils import get_mc_versions, get_core_versions, available_downloads
 
     versions_list = (
-        await get_mc_versions(
+        get_mc_versions(
             database_type="upstream",
             core_type=core_type,
         )
@@ -132,7 +132,7 @@ async def get_core_versions(core_type: str = "", mc_version: str = ""):
         else []
     )
     database_data = (
-        await get_core_versions(
+        get_core_versions(
             database_type="upstream",
             core_type=core_type,
             mc_version=mc_version,
@@ -169,7 +169,7 @@ async def get_specified_core(
     )
 
     mc_versions_list = (
-        await get_mc_versions(
+        get_mc_versions(
             database_type="upstream",
             core_type=core_type,
         )
@@ -177,7 +177,7 @@ async def get_specified_core(
         else []
     )
     core_versions_list = (
-        await get_core_versions(
+        get_core_versions(
             database_type="upstream",
             core_type=core_type,
             mc_version=mc_version,
@@ -186,7 +186,7 @@ async def get_specified_core(
         else []
     )
     database_data = (
-        await get_specified_core_data(
+        get_specified_core_data(
             database_type="upstream",
             core_type=core_type,
             mc_version=mc_version,
