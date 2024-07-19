@@ -49,10 +49,10 @@ class AsyncDownloader:
                 except AssertionError as err:
                     retries -= 1
                     if retries > 0:
-                        SyncLogger.warning(f"从{uri}下载文件{filename}失败！正在重试！剩余重试次数：{retries}")
+                        SyncLogger.warning(f"Download failed | {filename} | {retries} retries left")
                         await self.download(uri, core_type, mc_version, core_version, retries)
                     else:
-                        SyncLogger.error(f"从{uri}下载文件{filename}失败！")
+                        SyncLogger.error(f"Download failed | {filename} ")
                         raise err
                 r_headers = head_response.headers
                 content_length = int(r_headers.get("Content-Length"), 0)

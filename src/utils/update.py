@@ -1,7 +1,10 @@
 import os
 from asyncio import run
 from concurrent.futures import ThreadPoolExecutor
+from threading import Thread
+from time import sleep
 
+from . import SyncLogger
 from .database import (
     available_downloads,
     get_mc_versions,
@@ -28,6 +31,10 @@ async def sync_database():
 
 
 class FileSync:
+    download_threads = 0
+    total_downloads = 0
+    finished_downloads = 0
+    failed_downloads = 0
 
     def __init__(self, upd: list | str = "all"):
         self.update_core_list = available_downloads if upd == "all" else upd.split(",")
@@ -35,6 +42,25 @@ class FileSync:
     def load_self(self):
         with ThreadPoolExecutor(max_workers=cfg.get("max_threads")) as executor:
             futures = []
+
+            def progress_logger():
+                while True:
+                    if self.total_downloads == 0:
+                        SyncLogger.info(
+                            f"Download threads: {self.download_threads} | "
+                            f"Finished downloads: {self.finished_downloads} | "
+                            f"Failed downloads: {self.failed_downloads}")
+                    else:
+                        SyncLogger.info(
+                            f"Download threads: {self.download_threads} | "
+                            f"Total downloads: {self.total_downloads} | "
+                            f"Finished downloads: {self.finished_downloads} | "
+                            f"Failed downloads: {self.failed_downloads} | "
+                            f"Download progress: {round((self.finished_downloads + self.failed_downloads) * 100.0 / self.total_downloads, 2)}%")
+                    sleep(1)
+
+            Thread(target=progress_logger, daemon=True).start()
+
             for core_type in self.update_core_list:
                 mc_versions_list = get_mc_versions(
                     database_type="upstream", core_type=core_type
@@ -46,13 +72,16 @@ class FileSync:
                     )
                     os.makedirs(f"files/{core_type}/{mc_version}", exist_ok=True)
                     for core_version in core_versions_list:
-                        executor.submit(self.load_single_build, core_type, mc_version, core_version)
+                        futures.append(executor.submit(self.load_single_build, core_type, mc_version, core_version))
+            self.total_downloads = len(futures)
             for future in futures:
                 future.result()
+            SyncLogger.info(f"Finished downloading | Failed downloads: {self.failed_downloads}")
 
     def load_single_build(
             self, core_type: str, mc_version: str, core_version: str
     ):
+        self.download_threads += 1
         core_data = get_specified_core_data(
             database_type="upstream",
             core_type=core_type,
@@ -68,7 +97,10 @@ class FileSync:
                     mc_version=core_data["mc_version"],
                     core_version=core_data["core_version"],
                 )
-            except AssertionError:
-                pass
+                self.finished_downloads += 1
+            except Exception:
+                self.failed_downloads += 1
+            finally:
+                self.download_threads -= 1
 
         run(download())
