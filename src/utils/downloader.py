@@ -40,12 +40,17 @@ class Downloader:
                     self.output_path, core_type, mc_version, filename
                 ).absolute()
                 SyncLogger.info(
-                    f"Downloading | {filename} | File size: {round(content_length / 1000000, 2)} MB"
+                    f"Downloading | "
+                    f"{filename} | "
+                    f"File size: {round(content_length / 1000000, 2) if content_length > 0 else "unknown"} MB"
                 )
                 for chunk in res.iter_content(chunk_size=4096):
                     file_path.write_bytes(chunk)
                 SyncLogger.success(
-                    f"Downloaded | {filename} | {(content_length / 1000 / 1000) / (time.time() - start_time):.2f} MB/s | {time.time() - start_time:.2f} s"
+                    f"Downloaded | "
+                    f"{filename} | "
+                    f"{round((content_length / 1000 / 1000) / (time.time() - start_time), 2) if content_length > 0 else "unknown"} MB/s | "
+                    f"{time.time() - start_time:.2f} s"
                 )
                 return file_path
             else:
