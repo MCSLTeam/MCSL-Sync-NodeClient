@@ -26,7 +26,6 @@ cfg = config_template.copy()  # type: dict
 makedirs("data", exist_ok=True)
 makedirs("logs", exist_ok=True)
 makedirs("files", exist_ok=True)
-makedirs("files/tmp", exist_ok=True)
 makedirs("data/upstream", exist_ok=True)
 
 
