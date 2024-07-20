@@ -22,34 +22,34 @@ config_template = {
         ]
     ),
 }
-cfg = config_template.copy()  # type: dict
 makedirs("data", exist_ok=True)
 makedirs("logs", exist_ok=True)
 makedirs("files", exist_ok=True)
-makedirs("files/tmp", exist_ok=True)
 makedirs("data/upstream", exist_ok=True)
 
-
-def init_settings():
+def init_settings() -> None:
     SyncLogger.info("Initializing Settings...")
     if not osp.exists("data/settings.json"):
         with open(
-                file="data/settings.json",
-                mode="wb+",
+            file="data/settings.json",
+            mode="wb+",
         ) as newConfig:
             newConfig.write(dumps(config_template, option=OPT_INDENT_2))
     else:
         pass
 
 
-def read_settings():
-    global cfg
+def read_settings() -> dict:
     try:
         with open(file="data/settings.json", mode="r", encoding="utf-8") as f:
             cfg = loads(f.read())
+        return cfg
     except FileNotFoundError:
         init_settings()
         read_settings()
+
+
+cfg = read_settings()
 
 def set_upstream(url: str) -> None:
     with open(file="data/settings.json", mode="r", encoding="utf-8") as f:

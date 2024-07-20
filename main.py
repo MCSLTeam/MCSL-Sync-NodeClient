@@ -14,6 +14,7 @@ if __name__ == "__main__":
     if args.init:
         init_settings()
     if args.server:
+        read_settings()
         start_production_server()
     if args.version:
         print(__version__)
