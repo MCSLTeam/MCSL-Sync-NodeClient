@@ -42,7 +42,7 @@ class Downloader:
                 SyncLogger.info(
                     f"Downloading | "
                     f"{filename} | "
-                    f"File size: {round(content_length / 1000000, 2) if content_length > 0 else "unknown"} MB"
+                    f"File size: {round(content_length / 1000000, 2) if content_length > 0 else 'unknown'} MB"
                 )
                 with file_path.open("wb") as f:
                     for chunk in res.iter_content(chunk_size=1024):
@@ -51,7 +51,7 @@ class Downloader:
                 SyncLogger.success(
                     f"Downloaded | "
                     f"{filename} | "
-                    f"{round((content_length / 1000 / 1000) / (time.time() - start_time), 2) if content_length > 0 else "unknown"} MB/s | "
+                    f"{round((content_length / 1000 / 1000) / (time.time() - start_time), 2) if content_length > 0 else 'unknown'} MB/s | "
                     f"{time.time() - start_time:.2f} s"
                 )
                 return file_path
