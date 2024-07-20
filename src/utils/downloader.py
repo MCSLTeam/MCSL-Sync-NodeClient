@@ -1,6 +1,5 @@
 import pathlib
 import time
-from urllib.parse import unquote
 
 import requests
 from requests.structures import CaseInsensitiveDict
@@ -54,7 +53,7 @@ class Downloader:
         except Exception as err:
             retries -= 1
             if retries > 0:
-                SyncLogger.warning(f"Download failed | {filename} | {retries} retries left")
+                SyncLogger.warning(f"Download failed | {filename} | {retries} retries left | {err}")
                 return self.download(uri, core_type, mc_version, core_version, retries)
             else:
                 SyncLogger.error(f"Download failed | {filename} | {err}")
@@ -63,11 +62,12 @@ class Downloader:
     def get_file_type(self, headers: CaseInsensitiveDict[str], default: str = "jar"):
         file_type = default
         try:
-            dispositions = headers['Content-Disposition'].split(';')
-            for disposition in dispositions:
-                if disposition.strip().lower().startswith('filename='):
-                    file_name = disposition.split('filename="')[1].split('"')[0]
-                    file_type = file_name.split('.')[-1]
+            if 'Content-Disposition' in headers and headers['Content-Disposition']:
+                dispositions = headers['Content-Disposition'].split(';')
+                for disposition in dispositions:
+                    if disposition.strip().lower().startswith('filename='):
+                        file_name = disposition.split('filename="')[1].split('"')[0]
+                        file_type = file_name.split('.')[-1]
         except IndexError:
             pass
         return file_type
