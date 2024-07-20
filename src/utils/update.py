@@ -1,6 +1,6 @@
 import os
 from asyncio import run
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Thread
 from time import sleep
 
@@ -11,9 +11,10 @@ from .database import (
     get_core_versions,
     get_specified_core_data,
 )
-from .downloader import AsyncDownloader
+from .downloader import Downloader
 from .settings import cfg
 
+downloader = Downloader(output_path="files")
 
 async def sync_database():
     from aiohttp import ClientSession
@@ -74,8 +75,7 @@ class FileSync:
                     for core_version in core_versions_list:
                         futures.append(executor.submit(self.load_single_build, core_type, mc_version, core_version))
             self.total_downloads = len(futures)
-            for future in futures:
-                future.result()
+            as_completed(futures)
             SyncLogger.info(f"Finished downloading | Failed downloads: {self.failed_downloads}")
 
     def load_single_build(
@@ -91,7 +91,7 @@ class FileSync:
 
         async def download():
             try:
-                await AsyncDownloader(worker_num=4).download(
+                downloader.download(
                     uri=core_data["download_url"],
                     core_type=core_data["core_type"],
                     mc_version=core_data["mc_version"],
