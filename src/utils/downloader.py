@@ -44,8 +44,10 @@ class Downloader:
                     f"{filename} | "
                     f"File size: {round(content_length / 1000000, 2) if content_length > 0 else "unknown"} MB"
                 )
-                for chunk in res.iter_content(chunk_size=4096):
-                    file_path.write_bytes(chunk)
+                with file_path.open("wb") as f:
+                    for chunk in res.iter_content(chunk_size=1024):
+                        f.write(chunk)
+
                 SyncLogger.success(
                     f"Downloaded | "
                     f"{filename} | "
