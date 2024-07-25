@@ -26,16 +26,12 @@ class Downloader:
         :return: 下载完成的文件路径
         """
         core_name = core_type + "-" + mc_version + "-" + core_version
-        filename = core_name + '.jar'
         SyncLogger.info(
             f"Start downloading | {core_name}"
         )
         file_path: pathlib.Path = pathlib.Path(
-            self.output_path, core_type, mc_version, filename
+            self.output_path, core_type, mc_version, core_name + '.jar'
         ).absolute()
-        if file_path.exists(): # 如果是jar并且存在就不请求直接跳过
-            SyncLogger.success(f"File already exists | {core_name}")
-            return file_path
         start_time = time.time()
         res = requests.get(uri, headers=headers, stream=True, allow_redirects=True, timeout=10)
         try:
@@ -46,8 +42,8 @@ class Downloader:
                 file_path: pathlib.Path = pathlib.Path(
                     self.output_path, core_type, mc_version, filename
                 ).absolute()
-                if file_path.exists(): # 如果不是jar请求到响应头后判断是否存在，存在直接跳过
-                    SyncLogger.success(f"File already exists | {core_name}")
+                if file_path.exists():  # 如果不是jar文件请求到响应头后判断是否存在，存在直接跳过
+                    SyncLogger.info(f"File already exists | {core_name}")
                     return file_path
                 SyncLogger.info(
                     f"Downloading | "

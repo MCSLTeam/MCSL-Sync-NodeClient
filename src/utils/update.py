@@ -1,6 +1,7 @@
 import os
+import pathlib
 from asyncio import run
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 from time import sleep
 
@@ -15,6 +16,7 @@ from .downloader import Downloader
 from .settings import cfg
 
 downloader = Downloader(output_path="files")
+
 
 async def sync_database():
     from aiohttp import ClientSession
@@ -73,6 +75,14 @@ class FileSync:
                     )
                     os.makedirs(f"files/{core_type}/{mc_version}", exist_ok=True)
                     for core_version in core_versions_list:
+                        # 如果是jar文件并且存在就不请求直接跳过
+                        core_name = core_type + "-" + mc_version + "-" + core_version
+                        file_path: pathlib.Path = pathlib.Path(
+                            downloader.output_path, core_type, mc_version, core_name + '.jar'
+                        ).absolute()
+                        if file_path.exists():
+                            SyncLogger.info(f"File already exists | {core_name}")
+                            continue
                         futures.append(executor.submit(self.load_single_build, core_type, mc_version, core_version))
             self.total_downloads = len(futures)
             for future in futures:
@@ -100,7 +110,8 @@ class FileSync:
                 )
                 self.finished_downloads += 1
             except Exception:
-                self.failed_downloads.append(core_data["core_type"] + '-' + core_data["mc_version"] + '-' + core_data["core_version"])
+                self.failed_downloads.append(
+                    core_data["core_type"] + '-' + core_data["mc_version"] + '-' + core_data["core_version"])
             finally:
                 self.download_threads -= 1
 
