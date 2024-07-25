@@ -38,7 +38,7 @@ class Downloader:
             if res.ok:
                 res_headers = res.headers
                 content_length = int(res_headers.get("Content-Length", "0"))
-                filename = core_name + self.get_file_type(res_headers)
+                filename = core_name + "." + self.get_file_type(res_headers)
                 file_path: pathlib.Path = pathlib.Path(
                     self.output_path, core_type, mc_version, filename
                 ).absolute()
