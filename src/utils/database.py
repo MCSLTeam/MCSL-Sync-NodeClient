@@ -1,5 +1,6 @@
 import sqlite3
 from .logger import SyncLogger
+
 available_downloads = [
     "Arclight",
     "Lightfall",
@@ -26,15 +27,21 @@ available_downloads = [
     "Vanilla",
     "Fabric",
     "Forge",
+    "Akarin",
+    "NukkitX",
+    "Thermos",
+    "Contigo",
+    "Luminol",
+    "LightingLuminol",
 ]
-
-
 
 
 def get_mc_versions(database_type: str, core_type: str) -> list[str]:
     with sqlite3.connect(f"data/{database_type}/{core_type}.db") as core:
         cursor = core.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+        )
         version_list = sorted([row[0] for row in cursor.fetchall()], reverse=True)
         return version_list
 
@@ -61,7 +68,9 @@ def get_specified_core_data(
 
 
 @SyncLogger.catch
-def update_database(database_type: str, core_type: str, mc_version: str, builds: list) -> None:
+def update_database(
+    database_type: str, core_type: str, mc_version: str, builds: list
+) -> None:
     with sqlite3.connect(f"data/{database_type}/{core_type}.db") as database:
         cursor = database.cursor()
         try:
