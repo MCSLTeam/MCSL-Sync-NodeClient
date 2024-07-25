@@ -57,7 +57,7 @@ async def base_dir():
     """
     return await gen_response(
         status_code=200,
-        msg=f"MCSL-Sync-Nodeside v{__version__} on Quart!",
+        msg=f"MCSL-Sync-NodeClient v{__version__} on Quart!",
     )
 
 
