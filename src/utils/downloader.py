@@ -75,6 +75,8 @@ class Downloader:
                     if disposition.strip().lower().startswith('filename='):
                         file_name = disposition.split('filename="')[1].split('"')[0]
                         file_type = file_name.split('.')[-1]
+            if file_type.endswith("?="):  # gerser and floodgate
+                file_type = file_type.removesuffix("?=")
         except IndexError:
             pass
         return file_type
