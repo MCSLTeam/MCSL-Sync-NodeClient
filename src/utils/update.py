@@ -35,7 +35,7 @@ class FileSync:
     download_threads = 0
     total_downloads = 0
     finished_downloads = 0
-    failed_downloads = 0
+    failed_downloads = []
 
     def __init__(self, upd: list | str = "all"):
         self.update_core_list = available_downloads if upd == "all" else upd.split(",")
@@ -56,8 +56,8 @@ class FileSync:
                             f"Download threads: {self.download_threads} | "
                             f"Total downloads: {self.total_downloads} | "
                             f"Finished downloads: {self.finished_downloads} | "
-                            f"Failed downloads: {self.failed_downloads} | "
-                            f"Download progress: {round((self.finished_downloads + self.failed_downloads) * 100.0 / self.total_downloads, 2)}%")
+                            f"Failed downloads: {len(self.failed_downloads)} | "
+                            f"Download progress: {round((self.finished_downloads + len(self.failed_downloads)) * 100.0 / self.total_downloads, 2)}%")
                     sleep(1)
 
             Thread(target=progress_logger, daemon=True).start()
@@ -75,7 +75,8 @@ class FileSync:
                     for core_version in core_versions_list:
                         futures.append(executor.submit(self.load_single_build, core_type, mc_version, core_version))
             self.total_downloads = len(futures)
-            as_completed(futures)
+            for future in futures:
+                future.result()
             SyncLogger.info(f"Finished downloading | Failed downloads: {self.failed_downloads}")
 
     def load_single_build(
@@ -99,7 +100,7 @@ class FileSync:
                 )
                 self.finished_downloads += 1
             except Exception:
-                self.failed_downloads += 1
+                self.failed_downloads.append(core_data["core_type"] + '-' + core_data["mc_version"] + '-' + core_data["core_version"])
             finally:
                 self.download_threads -= 1
 

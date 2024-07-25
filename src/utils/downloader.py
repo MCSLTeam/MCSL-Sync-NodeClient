@@ -25,23 +25,33 @@ class Downloader:
         :param filename: 指定文件名, 缺省则自动获取
         :return: 下载完成的文件路径
         """
-        filename = (core_type + "-" + mc_version + "-" + core_version)
+        core_name = core_type + "-" + mc_version + "-" + core_version
+        filename = core_name + '.jar'
         SyncLogger.info(
-            f"Start downloading | {filename}"
+            f"Start downloading | {core_name}"
         )
+        file_path: pathlib.Path = pathlib.Path(
+            self.output_path, core_type, mc_version, filename
+        ).absolute()
+        if file_path.exists(): # 如果是jar并且存在就不请求直接跳过
+            SyncLogger.success(f"File already exists | {core_name}")
+            return file_path
         start_time = time.time()
-        res = requests.get(uri, headers=headers, stream=True, allow_redirects=True)
+        res = requests.get(uri, headers=headers, stream=True, allow_redirects=True, timeout=10)
         try:
             if res.ok:
                 res_headers = res.headers
                 content_length = int(res_headers.get("Content-Length", "0"))
-                filename = filename + "." + self.get_file_type(res_headers)
+                filename = core_name + self.get_file_type(res_headers)
                 file_path: pathlib.Path = pathlib.Path(
                     self.output_path, core_type, mc_version, filename
                 ).absolute()
+                if file_path.exists(): # 如果不是jar请求到响应头后判断是否存在，存在直接跳过
+                    SyncLogger.success(f"File already exists | {core_name}")
+                    return file_path
                 SyncLogger.info(
                     f"Downloading | "
-                    f"{filename} | "
+                    f"{core_name} | "
                     f"File size: {round(content_length / 1000000, 2) if content_length > 0 else 'unknown'} MB"
                 )
                 with file_path.open("wb") as f:
@@ -50,7 +60,7 @@ class Downloader:
 
                 SyncLogger.success(
                     f"Downloaded | "
-                    f"{filename} | "
+                    f"{core_name} | "
                     f"{round((content_length / 1000 / 1000) / (time.time() - start_time), 2) if content_length > 0 else 'unknown'} MB/s | "
                     f"{time.time() - start_time:.2f} s"
                 )
@@ -60,10 +70,10 @@ class Downloader:
         except Exception as err:
             retries -= 1
             if retries > 0:
-                SyncLogger.warning(f"Download failed | {filename} | {retries} retries left | {err}")
+                SyncLogger.warning(f"Download failed | {core_name} | {retries} retries left | {err}")
                 return self.download(uri, core_type, mc_version, core_version, retries)
             else:
-                SyncLogger.error(f"Download failed | {filename} | {err}")
+                SyncLogger.error(f"Download failed | {core_name} | {err}")
                 raise err
 
     def get_file_type(self, headers: CaseInsensitiveDict[str], default: str = "jar"):
